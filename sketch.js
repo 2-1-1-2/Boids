@@ -3,6 +3,9 @@
 let flock;
 let words;
 let splitWords;
+let fade;
+let fadeAmount = 1;
+let time = 0;
 
 function preload() {
   words = loadStrings('words.txt');
@@ -14,11 +17,11 @@ function setup() {
   createP("Drag the mouse to generate new boids.");
 
   splitWords = split(words[0], ',');
-
+  fade = 0;
   flock = new Flock();
   // Add an initial set of boids into the system
   for (let i = 0; i < 91; i++) {
-    let b = new Boid(width / 2, height / 2);
+    let b = new Boid(width / 2, height / 2, i);
     flock.addBoid(b);
   }
 }
@@ -33,6 +36,12 @@ function draw() {
 function mouseDragged() {
   flock.addBoid(new Boid(mouseX, mouseY));
 }
+
+
+function mousePressed() {
+  flock.changeApparition();
+}
+
 
 // The Nature of Code
 // Daniel Shiffman
@@ -56,6 +65,14 @@ Flock.prototype.addBoid = function (b) {
   this.boids.push(b);
 }
 
+
+Flock.prototype.changeApparition = function () {
+  this.boids.forEach(boid => boid.apparition = 1 - boid.apparition)
+  /*
+    this.apparition = 1 - this.apparition
+  */
+}
+
 // The Nature of Code
 // Daniel Shiffman
 // http://natureofcode.com
@@ -63,16 +80,16 @@ Flock.prototype.addBoid = function (b) {
 // Boid class
 // Methods for Separation, Cohesion, Alignment added
 
-function Boid(x, y) {
+function Boid(x, y, i = 0) {
   this.acceleration = createVector(0, 0);
   this.velocity = createVector(random(-1, 1), random(-1, 1));
   this.position = createVector(x, y);
   this.r = 3.0;
-  this.maxspeed = 2;    // Maximum speed
-  this.maxforce = 0.05; // Maximum steering force
-  let tmp = (int)(Math.random() * splitWords.length)
-  console.log(tmp)
-  this.word = splitWords.splice(tmp, 1);
+  this.maxspeed = 1;    // Maximum speed
+  this.maxforce = 0.005; // Maximum steering force
+
+  this.word = splitWords.splice((int)(Math.random() * splitWords.length), 1);
+  this.apparition = i < 91 / 2 ? 0 : 1;
 }
 
 Boid.prototype.run = function (boids) {
@@ -129,13 +146,32 @@ Boid.prototype.seek = function (target) {
 Boid.prototype.render = function () {
   // Draw a triangle rotated in the direction of velocity
   let theta = this.velocity.heading() + radians(90);
-  fill(200);
-  stroke(255);
+  fill(255, 255, 255, fade)
+  //stroke(255);
+
+
   push();
   //translate(this.position.x, this.position.y);
   //rotate(theta);
-  textSize(20);
-  text(this.word, this.position.x, this.position.y);
+  textSize(15);
+  /*
+  time += deltaTime;
+  console.log(time)
+  if (fade < 0) fadeAmount = 1;
+
+  if (fade > 255) fadeAmount = -1;
+
+  if (deltaTime % 50 < 10) {
+    fade += fadeAmount;
+  }
+  */
+  if (this.apparition == 1) {
+    text(this.word, this.position.x - this.word.length, this.position.y);
+  }
+  else {
+    text(".", this.position.x, this.position.y);
+  }
+
 
   pop();
 }
@@ -151,7 +187,7 @@ Boid.prototype.borders = function () {
 // Separation
 // Method checks for nearby boids and steers away
 Boid.prototype.separate = function (boids) {
-  let desiredseparation = 15.0 * this.word.length;
+  let desiredseparation = this.word.length * this.word.length * 100;
   let steer = createVector(0, 0);
   let count = 0;
   // For every boid in the system, check if it's too close

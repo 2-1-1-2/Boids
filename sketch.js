@@ -3,9 +3,10 @@
 let flock;
 let words;
 let splitWords;
-let fade;
-let fadeAmount = 1;
-let time = 0;
+let time = -1;
+let max_delta = 0;
+let coeff_t = 2.5;
+let reset = -1;
 
 function preload() {
   words = loadStrings('words.txt');
@@ -14,16 +15,28 @@ function preload() {
 
 function setup() {
   createCanvas(720, 576);
-  createP("Drag the mouse to generate new boids.");
 
   splitWords = split(words[0], ',');
-  fade = 0;
   flock = new Flock();
   // Add an initial set of boids into the system
   for (let i = 0; i < 91; i++) {
     let b = new Boid(width / 2, height / 2, i);
     flock.addBoid(b);
   }
+
+
+
+}
+function resetAnimation() {
+
+  splitWords = split(words[0], ',');
+  flock = new Flock();
+  // Add an initial set of boids into the system
+  for (let i = 0; i < 91; i++) {
+    let b = new Boid(width / 2, height / 2, i);
+    flock.addBoid(b);
+  }
+  time = -10;
 }
 
 function draw() {
@@ -38,9 +51,6 @@ function mouseDragged() {
 }
 
 
-function mousePressed() {
-  flock.changeApparition();
-}
 
 
 // The Nature of Code
@@ -66,19 +76,7 @@ Flock.prototype.addBoid = function (b) {
 }
 
 
-Flock.prototype.changeApparition = function () {
-  this.boids.forEach(boid => boid.apparition = 1 - boid.apparition)
-  /*
-    this.apparition = 1 - this.apparition
-  */
-}
 
-// The Nature of Code
-// Daniel Shiffman
-// http://natureofcode.com
-
-// Boid class
-// Methods for Separation, Cohesion, Alignment added
 
 function Boid(x, y, i = 0) {
   this.acceleration = createVector(0, 0);
@@ -89,7 +87,9 @@ function Boid(x, y, i = 0) {
   this.maxforce = 0.005; // Maximum steering force
 
   this.word = splitWords.splice((int)(Math.random() * splitWords.length), 1);
-  this.apparition = i < 91 / 2 ? 0 : 1;
+  this.apparition = Math.floor(Math.random() * (500000 - 300000 + 1) + 300000);
+  max_delta = this.apparition * (coeff_t + 0.1) > max_delta ? this.apparition * (coeff_t + 0.1) : max_delta;
+  //i < 91 / 2 ? 0 : 1;
 }
 
 Boid.prototype.run = function (boids) {
@@ -144,37 +144,36 @@ Boid.prototype.seek = function (target) {
 }
 
 Boid.prototype.render = function () {
-  // Draw a triangle rotated in the direction of velocity
-  let theta = this.velocity.heading() + radians(90);
-  fill(255, 255, 255, fade)
-  //stroke(255);
-
 
   push();
-  //translate(this.position.x, this.position.y);
-  //rotate(theta);
-  textSize(15);
-  /*
-  time += deltaTime;
-  console.log(time)
-  if (fade < 0) fadeAmount = 1;
+  textSize(20);
 
-  if (fade > 255) fadeAmount = -1;
+  if (time > this.apparition && time < (coeff_t - 0.5) * this.apparition) {
 
-  if (deltaTime % 50 < 10) {
-    fade += fadeAmount;
-  }
-  */
-  if (this.apparition == 1) {
+    fill(200);
+    stroke(255);
     text(this.word, this.position.x - this.word.length, this.position.y);
   }
+  else if (time >= max_delta) {
+    resetAnimation();
+    return;
+  }
+  else if (time > coeff_t * this.apparition) text("", this.position.x, this.position.y);
+
   else {
+    fill(Math.random() * 255, Math.random() * 255, Math.random() * 255);
+    stroke(255);
     text(".", this.position.x, this.position.y);
   }
 
+  time += deltaTime;
 
   pop();
+
+
 }
+
+
 
 // Wraparound
 Boid.prototype.borders = function () {

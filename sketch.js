@@ -1,15 +1,18 @@
-
-
 let flock;
 let words;
+let myFont;
 let splitWords;
-let time = -1;
+let time = -10;
 let max_delta = 0;
 let coeff_t = 2.5;
-let reset = -1;
+let colors = ['#FFC107', '#FF9800', '#FF5722'];
+let colors_b = ['#3e1609', '#000000'];
+
 
 function preload() {
   words = loadStrings('words.txt');
+
+  myFont = loadFont('Heavitas.ttf');
 }
 
 
@@ -18,9 +21,9 @@ function setup() {
 
   splitWords = split(words[0], ',');
   flock = new Flock();
-  // Add an initial set of boids into the system
   for (let i = 0; i < 91; i++) {
-    let b = new Boid(width / 2, height / 2, i);
+    pos = i < (91 / 4) ? 2 : i < (91 / 2) ? 4 : i < (91 * 3 / 4) ? 1.5 : 1;
+    let b = new Boid(width / pos, height / pos, i);
     flock.addBoid(b);
   }
 
@@ -29,14 +32,22 @@ function setup() {
 }
 function resetAnimation() {
 
+  max_delta = 0;
   splitWords = split(words[0], ',');
   flock = new Flock();
+  let pos;
+
+  time = -6000;
   // Add an initial set of boids into the system
   for (let i = 0; i < 91; i++) {
-    let b = new Boid(width / 2, height / 2, i);
+
+    time = -6000;
+    pos = i < (91 / 4) ? 2 : i < (91 / 2) ? 4 : i < (91 * 3 / 4) ? 1.5 : 1;
+    let b = new Boid(width / pos, height / pos, i);
     flock.addBoid(b);
   }
-  time = -10;
+  time = -6000;
+
 }
 
 function draw() {
@@ -51,14 +62,13 @@ function mouseDragged() {
 }
 
 
-
-
 // The Nature of Code
 // Daniel Shiffman
 // http://natureofcode.com
 
 // Flock object
 // Does very little, simply manages the array of all the boids
+
 
 function Flock() {
   // An array for all the boids
@@ -76,20 +86,19 @@ Flock.prototype.addBoid = function (b) {
 }
 
 
-
-
 function Boid(x, y, i = 0) {
   this.acceleration = createVector(0, 0);
   this.velocity = createVector(random(-1, 1), random(-1, 1));
   this.position = createVector(x, y);
   this.r = 3.0;
   this.maxspeed = 1;    // Maximum speed
-  this.maxforce = 0.005; // Maximum steering force
-
+  this.maxforce = 0.006; // Maximum steering force
+  let time = pos = i < (91 / 4) ? 2 : i < (91 / 2) ? 1 : i < (91 * 3 / 4) ? 1 : 0.5;
+  this.color = Math.floor(time);
   this.word = splitWords.splice((int)(Math.random() * splitWords.length), 1);
-  this.apparition = Math.floor(Math.random() * (500000 - 300000 + 1) + 300000);
+  this.apparition = Math.floor(Math.random() * (400000 * time - 200000 * time + 1) + 300000 * time);
   max_delta = this.apparition * (coeff_t + 0.1) > max_delta ? this.apparition * (coeff_t + 0.1) : max_delta;
-  //i < 91 / 2 ? 0 : 1;
+
 }
 
 Boid.prototype.run = function (boids) {
@@ -146,13 +155,14 @@ Boid.prototype.seek = function (target) {
 Boid.prototype.render = function () {
 
   push();
-  textSize(20);
+
+  textFont(myFont);
+  let size = (this.color + 1) * this.apparition / time
+  textSize(10 * size);
 
   if (time > this.apparition && time < (coeff_t - 0.5) * this.apparition) {
-
-    fill(200);
-    stroke(255);
-    text(this.word, this.position.x - this.word.length, this.position.y);
+    fill(colors[this.color]);
+    text(this.word, this.position.x - this.word.length * 10 * size, this.position.y);
   }
   else if (time >= max_delta) {
     resetAnimation();
@@ -160,9 +170,12 @@ Boid.prototype.render = function () {
   }
   else if (time > coeff_t * this.apparition) text("", this.position.x, this.position.y);
 
-  else {
-    fill(Math.random() * 255, Math.random() * 255, Math.random() * 255);
-    stroke(255);
+  else if (time > 0) {
+    if (this.apparition > time) textSize(30 * (this.color + 1) * time / this.apparition);
+    else textSize(30 * size);
+    console.log(time)
+    fill(colors[(int)(Math.random() * 3)]);
+
     text(".", this.position.x, this.position.y);
   }
 

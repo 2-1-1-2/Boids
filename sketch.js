@@ -27,8 +27,6 @@ function setup() {
     flock.addBoid(b);
   }
 
-
-
 }
 function resetAnimation() {
 
@@ -51,7 +49,7 @@ function resetAnimation() {
 }
 
 function draw() {
-  background(0);
+  background("#1f1613");
 
   flock.run();
 }
@@ -90,9 +88,10 @@ function Boid(x, y, i = 0) {
   this.acceleration = createVector(0, 0);
   this.velocity = createVector(random(-1, 1), random(-1, 1));
   this.position = createVector(x, y);
-  this.r = 3.0;
+  this.r = 5.0;
   this.maxspeed = 1;    // Maximum speed
-  this.maxforce = 0.006; // Maximum steering force
+  this.maxforce = 0.008; // Maximum steering force
+  // !HERE!
   let time = pos = i < (91 / 4) ? 2 : i < (91 / 2) ? 1 : i < (91 * 3 / 4) ? 1 : 0.5;
   this.color = Math.floor(time);
   this.word = splitWords.splice((int)(Math.random() * splitWords.length), 1);
@@ -153,9 +152,8 @@ Boid.prototype.seek = function (target) {
 }
 
 Boid.prototype.render = function () {
-
+  // !HERE!
   push();
-
   textFont(myFont);
   let size = (this.color + 1) * this.apparition / time
   textSize(10 * size);
@@ -169,7 +167,6 @@ Boid.prototype.render = function () {
     return;
   }
   else if (time > coeff_t * this.apparition) text("", this.position.x, this.position.y);
-
   else if (time > 0) {
     if (this.apparition > time) textSize(30 * (this.color + 1) * time / this.apparition);
     else textSize(30 * size);
@@ -180,7 +177,6 @@ Boid.prototype.render = function () {
   }
 
   time += deltaTime;
-
   pop();
 
 

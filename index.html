@@ -4,22 +4,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>p5.js example</title>
+  <title>Recording - HW</title>
   <style>
+    @font-face {
+    font-family : 'Heavitas'; /* nom que l’on donne à la police . */
+    /* chemin d’accès à la police. */
+    /*En cas de sources multiples, les séparer par des virgules. */
+    /* Elles seront classées par priorité. */
+    src : url('Heavitas.ttf') format('ttf');
+    font-weight : normal; /* le poids (bold, 400, 700, 900 ...) */
+    font-style : normal; /* italique ou normal */
+}
+
     body {
       padding: 0;
       margin: 0;
-      background-color: #1b1b1b;
+      background-color: #1f1613;
     }
+    .title {
+      font-family: Heavitas;
+      text-align: center;
+      color : #FF5722;
+    }
+    
+    .title2 {
+      font-family: Heavitas;
+      text-align: center;
+      color : #FF9800;
+    }
+
+
+    .bord {
+      
+      background-color: #1f1613;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+  height: 100%;
+  max-width: 720px;
+      border: thick solid #FF5722;
+    }
+    .texte {
+      
+      border-bottom: thick solid #FF5722;
+    }
+    canvas {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+
+   
   </style>
   <script src="lib/p5.min.js"></script>
   <!-- <script src="../addons/p5.sound.js"></script> -->
   <script src="sketch.js"></script>
 </head>
 
+
 <body>
+  <div class="bord">
+    <div class="texte">
+    <h2 class="title2">| | | | | | | | | | | | | | | <span class="title">Infinite loop</span>  | | | | | | | | | | | | | | |</h2>
+    <h4 class="title2" >S w a r m</h4>
+  </div>
   <main>
   </main>
+  </div>
 </body>
 
 </html>
